@@ -17,7 +17,7 @@ namespace RemoteTech
         }
 
         public Guid Guid { 
-            get { return SignalProcessor.Guid; }
+            get { return SignalProcessorWithGuid.Guid; }
         }
 
         public Vector3d Position { 
@@ -48,7 +48,21 @@ namespace RemoteTech
             }
         }
 
-        public bool HasLocalControl
+		public ISignalProcessor SignalProcessorWithGuid {
+			get {
+				if ((mSignalProcessorWithGuid.Field != null) && mSignalProcessorWithGuid.Field.Guid.Equals(Guid.Empty))
+				{
+					mSignalProcessorWithGuid.Reset();
+				}
+
+				return RTUtil.CachePerFrame(ref mSignalProcessor, () => {
+					IEnumerable<ISignalProcessor> spus = SignalProcessors.Where(s => !s.Guid.Equals(Guid.Empty));
+					return spus.FirstOrDefault(s => s.FlightComputer != null) ?? spus.FirstOrDefault();
+				});
+			}
+		}
+
+		public bool HasLocalControl
         {
             get
             {
@@ -82,7 +96,8 @@ namespace RemoteTech
         }
 
         private CachedField<ISignalProcessor> mSignalProcessor;
-        private CachedField<bool> mLocalControl;
+		private CachedField<ISignalProcessor> mSignalProcessorWithGuid;
+		private CachedField<bool> mLocalControl;
 
         public VesselSatellite(List<ISignalProcessor> parts)
         {

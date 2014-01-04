@@ -9,5 +9,11 @@ namespace RemoteTech
     {
         public T Field;
         public int Frame;
+
+		public void Reset()
+		{
+			Field = default(T);
+			Frame = 0;
+		}
     }
 }
